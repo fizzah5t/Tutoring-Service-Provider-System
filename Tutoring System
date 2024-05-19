@@ -1,0 +1,507 @@
+package com.mycompany.projecttest;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+import java.time.LocalDateTime;
+/**
+ *
+ * @author hp
+ */
+//main class/Runner class
+public class ProjectTest {
+
+//main method
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        //User class object
+        User user1 = new User(1, "JohnDoe", "john@example.com", "password123");
+        //Teavjher class object
+        Teacher teacher1 = new Teacher(2, "JaneSmith", "jane@example.com", "password456", "Mathematics", "PhD");
+        //Student class object
+        Student student1 = new Student(3, "EmilyJones", "emily@example.com", "password789");
+
+        List<User> users = new ArrayList<>();
+        users.add(user1);
+        users.add(teacher1);
+        users.add(student1);
+	
+        //Course class object
+        Course course1 = new Course("Algebra", 200.0, 2);
+
+        LocalDateTime startTime = LocalDateTime.of(2024, 6, 1, 10, 0);
+        LocalDateTime endTime = LocalDateTime.of(2024, 6, 1, 12, 0);
+
+        //SessionScheduler class object
+        SessionScheduler session1 = new SessionScheduler(1, startTime, endTime, course1);
+
+        boolean running = true;
+        while (running) {
+            System.out.println("Menu:");
+            System.out.println("1. Display user information");
+            System.out.println("2. Enroll in a course");
+            System.out.println("3. Withdraw from a course");
+            System.out.println("4. Schedule a session");
+            System.out.println("5. Process payment");
+            System.out.println("6. Give a rating");
+            System.out.println("7. Exit");
+            System.out.print("Choose an option: ");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    for (User user : users) {
+                        user.viewProfile();
+                        System.out.println();
+                    }
+                    break;
+                case 2:
+                    student1.enrollCourse(course1);
+                    course1.enroll(student1);
+                    break;
+                case 3:
+                    student1.withdrawCourse(course1);
+                    break;    
+                case 4:
+                    session1.scheduleSession(session1);
+                    break;
+                case 5:
+                    Payment payment = new Payment(1, 200.0, "USD");
+                    try {
+                        payment.processPayment();
+                    } catch (PaymentFailedException e) {
+                        System.out.println(e.getMessage());
+                    }
+                    break;
+                case 6:
+                    int stars = 0;
+                    Scanner ratingScanner = new Scanner(System.in);
+                    while (stars < 1 || stars > 5) {
+                        System.out.print("Enter rating stars (1-5): ");
+                        stars = ratingScanner.nextInt();
+                        ratingScanner.nextLine(); // Consume newline
+                        if (stars < 1 || stars > 5) {
+                            System.out.println("Invalid rating. Please enter a number between 1 and 5.");
+                        }
+                    }
+                    System.out.print("Enter description: ");
+                    String description = ratingScanner.nextLine();
+
+                    Rating rating = new Rating(stars, description, user1);
+                    rating.displayRating();
+                    break;
+                case 7:
+                    running = false;
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+
+        scanner.close();
+        
+    }//main
+}// mainClass
+
+ class User {
+   //data members
+    private int id;
+    private String username;
+    private String email;
+    private String password;
+
+   //constructor
+    public User(int id, String username, String email, String password) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+    }
+    
+    //setters and getters
+    public int getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    //class methods
+    public boolean checkPassword(String password) {
+        return this.password.equals(password);
+    }
+    
+    public void updateProfile(String newEmail, String newPassword) {
+        if (newEmail != null && !newEmail.isEmpty()) {
+            setEmail(newEmail);
+        }
+        if (newPassword != null && !newPassword.isEmpty()) {
+            setPassword(newPassword);
+        }
+        System.out.println("Profile updated successfully.");
+    }
+
+    public void viewProfile() {
+        System.out.println("User Profile:");
+        System.out.println("ID: " + getId());
+        System.out.println("Username: " + getUsername());
+        System.out.println("Email: " + getEmail());
+    }
+
+    @Override
+    public String toString() {
+        return "User{id=" + id + ", username='" + username + '\'' +
+               ", email='" + email + '\'' + '}';
+    }
+}
+
+
+
+ class Teacher extends User {//inheritance
+   //data members
+    private String expertise;
+    private String qualification;
+    private List<Course> coursesTaught;
+    private double rating;
+    //constructors
+    public Teacher(int id, String username, String email, String password, String expertise, String qualification) {
+        super(id, username, email, password);
+        this.expertise = expertise;
+        this.qualification = qualification;
+        this.coursesTaught = new ArrayList<>();
+        this.rating = 0.0; // Initial rating is set to 0
+    }
+    
+    //setters and getters
+    public String getExpertise() {
+        return expertise;
+    }
+
+    public void setExpertise(String expertise) {
+        this.expertise = expertise;
+    }
+
+    public String getQualification() {
+        return qualification;
+    }
+
+    public void setQualification(String qualification) {
+        this.qualification = qualification;
+    }
+
+    public List<Course> getCoursesTaught() {
+        return coursesTaught;
+    }
+
+        //class methods
+
+    public void addCourse(Course course) {
+        coursesTaught.add(course);
+        System.out.println("Course added: " + course.getName());
+    }
+
+    public void removeCourse(Course course) {
+        coursesTaught.remove(course);
+        System.out.println("Course removed: " + course.getName());
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void updateRating(double newRating) {
+        rating = (rating + newRating) / 2;
+        System.out.println("Rating updated: " + rating);
+    }
+
+    @Override
+    public String toString() {
+        return "Teacher{" + "id=" + getId() + ", username='" + getUsername() + '\'' +
+               ", email='" + getEmail() + '\'' + ", expertise='" + expertise + '\'' +
+               ", qualification='" + qualification + '\'' + ", rating=" + rating + '}';
+    }
+}
+
+
+
+ class Student extends User {
+   //data memnbers
+    private List<Course> coursesEnrolled;
+
+   //constructors
+    public Student(int id, String username, String email, String password) {
+        super(id, username, email, password);
+        this.coursesEnrolled = new ArrayList<>();
+    }
+     
+    public List<Course> getCoursesEnrolled() {
+        return coursesEnrolled;
+    }
+    
+    //class methods
+    public void enrollCourse(Course course) {
+        coursesEnrolled.add(course);
+        System.out.println("Enrolled in course: " + course.getName());
+    }
+
+    public void withdrawCourse(Course course) {
+        coursesEnrolled.remove(course);
+        System.out.println("Withdrawn from course: " + course.getName());
+    }
+
+    @Override
+    public String toString() {
+        return "Student{" + "id=" + getId() + ", username='" + getUsername() + '\'' +
+               ", email='" + getEmail() + '\'' + ", coursesEnrolled=" + coursesEnrolled + '}';
+    }
+}
+
+
+
+
+ class Course {
+   //data members
+    private String name;
+    private double tuitionFee;
+    private int capacity;
+    private List<Student> enrolledStudents;
+
+   //constructor
+    public Course(String name, double tuitionFee, int capacity) {
+        this.name = name;
+        this.tuitionFee = tuitionFee;
+        this.capacity = capacity;
+        this.enrolledStudents = new ArrayList<>();
+    }
+ 
+    //setters and gedtters
+    public String getName() {
+        return name;
+    }
+
+    public double getTuitionFee() {
+        return tuitionFee;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
+
+    public List<Student> getEnrolledStudents() {
+        return enrolledStudents;
+    }
+        //class methods
+
+    public void enroll(Student student) {
+        if (!isFull()) {
+            enrolledStudents.add(student);
+            System.out.println("Student enrolled in course: " + name);
+        } else {
+            System.out.println("Course is full. Cannot enroll more students.");
+        }
+    }
+
+    public boolean isFull() {
+        return enrolledStudents.size() >= capacity;
+    }
+
+    public int getAvailableSeats() {
+        return capacity - enrolledStudents.size();
+    }
+
+    @Override
+    public String toString() {
+        return "Course{" + "name='" + name + '\'' + ", tuitionFee=" + tuitionFee +
+               ", capacity=" + capacity + ", enrolledStudents=" + enrolledStudents + '}';
+    }
+}
+
+
+
+
+ abstract class Session {
+   //dtaa members
+    private int id;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private Course course;
+ 
+   //constructor
+    public Session(int id, LocalDateTime startTime, LocalDateTime endTime, Course course) {
+        this.id = id;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.course = course;
+    }
+
+   //getters and setters
+    public int getId() {
+        return id;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return endTime;
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    // Abstract method to be implemented by subclasses
+    public abstract void conductSession();
+
+    
+}
+
+ class SessionScheduler extends Session { //concrete subclass for abstract class Session
+    private List<Session> scheduledSessions;
+
+    //constructor
+    public SessionScheduler(int id, LocalDateTime startTime, LocalDateTime endTime, Course course) {
+        super(id, startTime, endTime, course);
+        this.scheduledSessions = new ArrayList<>();
+    }
+
+    @Override
+    public void conductSession() {
+        System.out.println("Session scheduled for course: " + getCourse().getName() +
+                " from " + getStartTime() + " to " + getEndTime());
+    }
+
+       //class methods
+
+    public void scheduleSession(Session session) {
+        if (!hasScheduleConflict(session)) {
+            scheduledSessions.add(session);
+            session.conductSession();
+            System.out.println("Session scheduled successfully.");
+        } else {
+            System.out.println("Session scheduling conflict detected.");
+        }
+    }
+
+    public void cancelSession(Session session) {
+        scheduledSessions.remove(session);
+        System.out.println("Session canceled for course: " + getCourse().getName());
+    }
+
+    public boolean hasScheduleConflict(Session newSession) {
+        for (Session session : scheduledSessions) {
+            if (session.getCourse().equals(newSession.getCourse()) &&
+                    session.getStartTime().isBefore(newSession.getEndTime()) &&
+                    newSession.getStartTime().isBefore(session.getEndTime())) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+ class Payment {
+   //data members
+    private int id;
+    private double amount;
+    private String currency;
+
+   //constructor
+    public Payment(int id, double amount, String currency) {
+        this.id = id;
+        this.amount = amount;
+        this.currency = currency;
+    }
+
+   //class methods
+    public void processPayment() throws PaymentFailedException {
+        if (isValid()) {
+            System.out.println("Processing payment of " + amount + " " + currency);
+            System.out.println("Payment processed successfully!");
+        } else {
+            throw new PaymentFailedException("Invalid payment amount: " + amount);
+        }
+    }
+
+
+    private boolean isValid() {
+        return amount > 0;
+    }
+}
+
+ class PaymentFailedException extends Exception {
+    public PaymentFailedException(String message) {
+        super(message);
+    }
+}
+
+ class Rating {
+   //data members
+    private int stars;
+    private String description;
+    private User user;
+
+    //constructor
+    public Rating(int stars, String description, User user) {
+        this.stars = stars;
+        this.description = description;
+        this.user = user;
+    }
+
+    //setters and getters
+    public int getStars() {
+        return stars;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+        //class methods
+
+    public void displayRating() {
+        System.out.println("Rating: " + stars + " stars");
+        System.out.println("Description: " + description);
+    }
+
+    public boolean isValidDescription() {
+        
+        return description != null && !description.isEmpty();
+    }
+
+    public static double calculateAverageRating(List<Rating> ratings) {
+        if (ratings.isEmpty()) {
+            return 0.0; // Return 0 if there are no ratings
+        }
+        int totalStars = 0;
+        for (Rating rating : ratings) {
+            totalStars += rating.getStars();
+        }
+        return (double) totalStars / ratings.size(); 
+    }
+}
